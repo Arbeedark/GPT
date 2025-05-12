@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daily Handover</title>
+  <style>
+    /* Holland & Barrett–inspired palette and typography */
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      background: #f4f4f4;
+      font-family: Arial, Helvetica, sans-serif;
+      color: #333;
+    }
+    .main-header {
+      background: #005335;
+      color: #fff;
+      text-align: center;
+      padding: 20px;
+      font-size: 1.75rem;
+      font-weight: bold;
+    }
+    .container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      padding: 20px;
+      box-sizing: border-box;
+      height: calc(100vh - 80px); /* full viewport minus header */
+      max-width: 1200px;
+      margin: auto;
+    }
+    .day-container {
+      flex: 1 1 45%;
+      display: flex;
+      flex-direction: column;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      min-width: 300px;
+      height: 100%;
+      box-sizing: border-box;
+    }
+    .date-header {
+      background: #005335;
+      color: #fff;
+      text-align: center;
+      padding: 12px;
+      font-size: 1.25rem;
+      font-weight: bold;
+      border-top-left-radius: 8px;
+      border-top-right-radius: 8px;
+      flex-shrink: 0;
+    }
+    .input-page {
+      flex: 1;
+      background: #fafafa;
+      border-top: 1px solid #ddd;
+      position: relative;
+      display: flex;
+    }
+    .input-page textarea {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 16px 12px;
+      border: none;
+      outline: none;
+      resize: none;
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: 1rem;
+      line-height: 1.5;
+      background-color: transparent;
+      box-sizing: border-box;
+    }
+    .input-page textarea::placeholder {
+      color: #aaa;
+    }
+    @media (max-width: 768px) {
+      .container {
+        flex-direction: column;
+        height: calc(100vh - 80px);
+      }
+      .day-container {
+        flex: 1 1 auto;
+        height: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="main-header">Daily Handover</header>
+  <div class="container">
+    <div class="day-container">
+      <div class="date-header" id="today-header"></div>
+      <div class="input-page">
+        <textarea id="today-jobs" placeholder="Enter today's jobs..."></textarea>
+      </div>
+    </div>
+    <div class="day-container">
+      <div class="date-header" id="tomorrow-header"></div>
+      <div class="input-page">
+        <textarea id="tomorrow-jobs" placeholder="Enter tomorrow's jobs..."></textarea>
+      </div>
+    </div>
+  </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const today = new Date();
+      const tomorrow = new Date();
+      tomorrow.setDate(today.getDate() + 1);
+
+      const todayKey = 'jobs-' + today.toISOString().split('T')[0];
+      const tomorrowKey = 'jobs-' + tomorrow.toISOString().split('T')[0];
+
+      function formatDate(date) {
+        return date.toLocaleDateString('en-GB', {
+          weekday: 'long',
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric'
+        });
+      }
+
+      document.getElementById('today-header').textContent = formatDate(today);
+      document.getElementById('tomorrow-header').textContent = formatDate(tomorrow);
+
+      const todayArea = document.getElementById('today-jobs');
+      const tomorrowArea = document.getElementById('tomorrow-jobs');
+
+      // Load saved content
+      todayArea.value = localStorage.getItem(todayKey) || '';
+      tomorrowArea.value = localStorage.getItem(tomorrowKey) || '';
+
+      // Auto-save on input
+      todayArea.addEventListener('input', () => {
+        localStorage.setItem(todayKey, todayArea.value);
+      });
+      tomorrowArea.addEventListener('input', () => {
+        localStorage.setItem(tomorrowKey, tomorrowArea.value);
+      });
+    });
+  </script>
+</body>
+</html>
