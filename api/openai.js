@@ -1,19 +1,12 @@
 export default async function handler(req, res) {
-  // Add CORS headers
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
 
-  // Handle preflight request
-  if (req.method === "OPTIONS") {
-    return res.status(200).end();
-  }
+  if (req.method === "OPTIONS") return res.status(200).end();
 
   const apiKey = process.env.OPENAI_API_KEY;
-
-  if (!apiKey) {
-    return res.status(500).json({ error: "Missing OpenAI API key in environment" });
-  }
+  if (!apiKey) return res.status(500).json({ error: "Missing API key" });
 
   try {
     const openaiRes = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -24,10 +17,9 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify(req.body),
     });
-
     const data = await openaiRes.json();
     return res.status(openaiRes.status).json(data);
-  } catch (error) {
-    return res.status(500).json({ error: error.message || "Unknown error" });
+  } catch (err) {
+    return res.status(500).json({ error: err.message || "Unknown error" });
   }
 }
