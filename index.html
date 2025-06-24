@@ -6,25 +6,36 @@
   <style>
     body { font-family: sans-serif; max-width: 600px; margin: auto; padding: 1em; }
     #chat { border: 1px solid #ccc; padding: 10px; height: 400px; overflow-y: auto; }
-    .msg { margin-bottom: 10px; }
+    .msg { margin-bottom: 10px; white-space: pre-wrap; }
     .user { font-weight: bold; }
     .assistant { color: green; }
     .error { color: red; }
+    #input { width: 80%; }
   </style>
 </head>
 <body>
   <h2>Ask me anything</h2>
   <div id="chat"></div>
-  <input type="text" id="input" placeholder="Type a message..." style="width: 80%;" />
-  <button onclick="sendMessage()">Send</button>
+  <input type="text" id="input" placeholder="Type a message..." />
+  <button id="sendBtn">Send</button>
 
   <script>
-    // ⚠️ Warning: exposing your key in client-side code is insecure.
-    //          For production you MUST proxy this through a backend.
-    const OPENAI_API_KEY = "YOUR_API_KEY_HERE";
+    // ⚠️ Reminder: exposing your key in client code is insecure for production.
+    const OPENAI_API_KEY = "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";
 
     const chatDiv = document.getElementById('chat');
     const input   = document.getElementById('input');
+    const sendBtn = document.getElementById('sendBtn');
+
+    // 1. Send on button click
+    sendBtn.addEventListener('click', sendMessage);
+
+    // 2. Send on Enter key
+    input.addEventListener('keyup', (e) => {
+      if (e.key === 'Enter') {
+        sendMessage();
+      }
+    });
 
     async function sendMessage() {
       const userMsg = input.value.trim();
@@ -47,22 +58,34 @@
             temperature: 0.7
           })
         });
-        if (!res.ok) throw new Error(`API ${res.status}: ${res.statusText}`);
+
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status} — ${res.statusText}`);
+        }
+
         const data = await res.json();
         const reply = data.choices?.[0]?.message?.content;
-        if (!reply) throw new Error("No response from API");
+        if (!reply) {
+          throw new Error("No completion returned.");
+        }
+
         appendMessage('assistant', reply);
+
       } catch (err) {
         console.error(err);
-        appendMessage('error', err.message);
+        appendMessage('error', `Error: ${err.message}`);
       }
 
       chatDiv.scrollTop = chatDiv.scrollHeight;
     }
 
     function appendMessage(who, text) {
-      const el = document.createElement('div');
-      el.className = `msg ${who}`;
-      el.textContent = (who === 'user' ? '🧑 ' : who === 'assistant' ? '🤖 ' : '⚠️ ') + text;
-      chatDiv.appendChild(el);
+      const div = document.createElement('div');
+      div.className = `msg ${who}`;
+      const emoji = who === 'user' ? '🧑' : who === 'assistant' ? '🤖' : '⚠️';
+      div.textContent = `${emoji} ${text}`;
+      chatDiv.appendChild(div);
     }
+  </script>
+</body>
+</html>
